@@ -17,7 +17,7 @@ By the end, I should be able to:
 2. Trace one request end-to-end across all modules.
 3. Add a new tool safely (policy + tests + eval case).
 4. Diagnose failures using logs and evaluation harnesses.
-5. Extend the system with an external harness (CloudCoder/Codex-style) without breaking core guarantees.
+5. Extend the system with an external harness (Claude Code/Codex-style) without breaking core guarantees.
 
 ## 3) Scope
 ### In scope
@@ -26,7 +26,7 @@ By the end, I should be able to:
 - Explicit policy enforcement before tool execution.
 - Memory + compaction + scheduled automation.
 - Basic multi-agent routing.
-- Integration layer for external harnesses (e.g., CloudCoder/Codex-like runtime).
+- Integration layer for external harnesses (e.g., Claude Code/Codex-like runtime).
 - Public-by-default project structure for safe GitHub publishing.
 
 ### Out of scope (for now)
@@ -89,7 +89,7 @@ Maintain a `golden_tasks` suite (10-20 tasks) covering:
 
 Rule: no major change ships without re-running the suite and recording results.
 
-## 9) External Harness Extension Goal (CloudCoder/Codex-style)
+## 9) External Harness Extension Goal (Claude Code/Codex-style)
 Goal: learn to build *on top of* existing harnesses, not only from scratch.
 
 Design requirement:
