@@ -1,0 +1,36 @@
+# Secrets and env
+.env
+.env.*
+!.env.example
+
+# Local assistant state (never commit)
+state/
+memory/
+sessions/
+transcripts/
+logs/
+tmp/
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# macOS
+.DS_Store
+
+# Local caches
+.cache/

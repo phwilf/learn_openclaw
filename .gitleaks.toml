@@ -1,0 +1,7 @@
+title = "openclaw-codex-gitleaks"
+
+[allowlist]
+description = "Allow test/example placeholders that are not real secrets"
+paths = [
+  '''(^|/)\\.env\\.example$''',
+]

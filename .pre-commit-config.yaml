@@ -1,0 +1,9 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks
+        name: gitleaks (staged content)
+        entry: ./scripts/run_gitleaks.sh
+        language: system
+        pass_filenames: false
+        stages: [pre-commit]

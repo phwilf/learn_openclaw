@@ -1,0 +1,1 @@
+"""persona module scaffold."""
