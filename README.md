@@ -31,3 +31,8 @@ PYTHONPATH=src python3 -m local_assistant.core_loop
 ./install_hooks.sh
 ./run_gitleaks.sh
 ```
+
+## Golden tasks (Step 2)
+```bash
+python3 scripts/run_golden_tasks.py
+```

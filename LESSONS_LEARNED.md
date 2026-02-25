@@ -43,3 +43,13 @@ Capture short notes at each milestone so learning is shareable.
 - What I would do differently next time: Install these guardrails immediately after `git init`.
 - Plain-language note: `pre-commit` is a gate that runs checks before a commit is accepted; `gitleaks` is one of those checks that looks for secrets in staged changes.
 - Scope note: This is a general software engineering best practice for most repositories, not specific to building an OpenClaw-like assistant.
+
+### Milestone: Step 2.2 - Baseline Golden Tasks
+- Date: 2026-02-25
+- What changed: Added a minimal golden-task runner with 5 baseline checks for current v0 behavior and secret-scan health.
+- What worked: Small deterministic checks make future refactors safer without adding heavy test tooling.
+- What failed / surprised me: Security checks can be the slowest part of a tiny suite but are still worth keeping in the baseline.
+- Key tradeoff: Narrow baseline scope now vs. broader behavioral coverage later.
+- Safety implications: Includes a required clean `gitleaks` run to keep publish-safety expectations testable.
+- What I would do differently next time: Add pass/fail snapshots per commit once behavior starts changing quickly.
+- Scope note: Golden-task harnessing is a general engineering reliability practice and not specific to OpenClaw-like assistant architecture.
