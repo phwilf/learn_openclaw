@@ -2,6 +2,10 @@
 
 Local-first, single-user project for learning assistant architecture end-to-end.
 
+## Learning path (start here)
+For the full roadmap, architecture goals, and milestone gates, read:
+- [`LEARNING_SPEC.md`](./LEARNING_SPEC.md)
+
 ## Current milestone
 Step 2 scaffold is in place:
 - Module folders under `src/local_assistant/`
