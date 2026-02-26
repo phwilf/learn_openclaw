@@ -1,5 +1,5 @@
 """Core loop package."""
 
-from .loop import run_single_turn
+from .loop import TurnResult, run_single_turn
 
-__all__ = ["run_single_turn"]
+__all__ = ["TurnResult", "run_single_turn"]

@@ -53,3 +53,13 @@ Capture short notes at each milestone so learning is shareable.
 - Safety implications: Includes a required clean `gitleaks` run to keep publish-safety expectations testable.
 - What I would do differently next time: Add pass/fail snapshots per commit once behavior starts changing quickly.
 - Scope note: Golden-task harnessing is a general engineering reliability practice and not specific to OpenClaw-like assistant architecture.
+
+### Milestone: Step 3a - Model Adapter Boundary
+- Date: 2026-02-26
+- What changed: Added a model adapter boundary (`stub` + `openai`), wired fallback handling in core loop, and extended golden tasks for config/failure behavior.
+- What worked: Adapter/factory design made provider choice environment-driven and kept core loop unchanged at call site.
+- What failed / surprised me: Live provider verification should remain opt-in to avoid blocking local deterministic runs.
+- Key tradeoff: More configuration paths vs. better extensibility and safer failure handling.
+- Safety implications: Missing/invalid provider config now degrades to a safe local fallback instead of crashing.
+- What I would do differently next time: Add a provider-level retry policy once observability is richer.
+- Scope note: Adapter boundaries and fallback tests are general architecture best practices, not OpenClaw-specific.

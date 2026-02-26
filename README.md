@@ -30,6 +30,11 @@ Step 2 scaffold is in place:
 PYTHONPATH=src python3 -m local_assistant.core_loop
 ```
 
+## Use a real model (OpenAI)
+```bash
+MODEL_PROVIDER=openai OPENAI_API_KEY=... PYTHONPATH=src python3 -m local_assistant.core_loop
+```
+
 ## Security checks
 ```bash
 ./install_hooks.sh

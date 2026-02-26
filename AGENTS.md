@@ -23,6 +23,7 @@ Run golden tasks before opening a PR.
 - Use type hints and dataclasses where appropriate (current code follows this pattern).
 - Prefer module/function names in `snake_case`; classes in `PascalCase`.
 - Keep docstrings concise and behavior-focused.
+- Optimize for concise, efficient, human-readable code by default; prefer the simplest implementation that preserves clarity.
 
 No auto-formatter is enforced yet; keep style consistent with existing files.
 
