@@ -7,6 +7,8 @@ Included tasks:
 - `v0_trim_behavior`
 - `v0_no_memory`
 - `v0_no_tool_calls`
+- `persona_loaded_default`
+- `persona_prompt_builder_structure`
 - `model_stub_default_path`
 - `model_missing_key_error`
 - `model_provider_failure_handled`

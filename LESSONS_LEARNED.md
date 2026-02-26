@@ -63,3 +63,23 @@ Capture short notes at each milestone so learning is shareable.
 - Safety implications: Missing/invalid provider config now degrades to a safe local fallback instead of crashing.
 - What I would do differently next time: Add a provider-level retry policy once observability is richer.
 - Scope note: Adapter boundaries and fallback tests are general architecture best practices, not OpenClaw-specific.
+
+### Milestone: Step 3b - Persona Research and Design Notes
+- Date: 2026-02-26
+- What changed: Captured a persona-layer deep dive before implementation, including definitions, misconceptions, best practices, and initial evaluation ideas.
+- What worked: Separating persona from memory and policy clarified module boundaries and reduced design ambiguity.
+- What failed / surprised me: It's easy to overuse persona text as a safety mechanism; hard enforcement still needs separate policy controls.
+- Key tradeoff: Rich persona instructions vs. keeping behavior contracts concise and testable.
+- Safety implications: Persona improves communication consistency but does not replace policy gateways or tool approval checks.
+- What I would do differently next time: Add persona regression tasks at the same time as the first implementation pass.
+- Deep dive: See `docs/persona.md` for full notes and implementation guidance.
+
+### Milestone: Step 3c - Persona Layer Implementation
+- Date: 2026-02-26
+- What changed: Implemented a file-backed persona profile, prompt-builder boundary, and core-loop persona injection into model calls.
+- What worked: Keeping persona in a dedicated module made the model adapter integration small and easy to reason about.
+- What failed / surprised me: Persona and policy can still be conflated unless tests explicitly check only behavior-style contracts.
+- Key tradeoff: Added configuration complexity (`PERSONA_PROFILE_PATH`) vs. better behavior portability and versioning.
+- Safety implications: Persona remains communication guidance only; enforcement still belongs in policy/tool layers.
+- What I would do differently next time: Add persona variants and compare them in eval runs before expanding policy/tool features.
+- Deep dive: See `docs/persona.md` for implementation details.

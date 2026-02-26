@@ -16,7 +16,9 @@ if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
 from local_assistant.core_loop import run_single_turn
+from local_assistant.core_loop.prompt_builder import build_messages
 from local_assistant.integration_adapters import ModelAdapterError, StubModelAdapter
+from local_assistant.persona import load_persona
 
 
 @dataclass
@@ -57,6 +59,21 @@ def task_v0_no_tool_calls() -> None:
     assert result.assistant_output == f"v0> {prompt}", result.assistant_output
 
 
+def task_persona_loaded_default() -> None:
+    persona = load_persona()
+    assert persona.name == "openclaw-learning", persona.name
+    assert persona.version == "v1", persona.version
+
+
+def task_persona_prompt_builder_structure() -> None:
+    persona = load_persona()
+    messages = build_messages(persona, "hello")
+    assert len(messages) == 2, messages
+    assert messages[0]["role"] == "system", messages
+    assert persona.name in messages[0]["content"], messages[0]["content"]
+    assert messages[1] == {"role": "user", "content": "hello"}, messages[1]
+
+
 def task_model_stub_default_path() -> None:
     old_provider = os.environ.get("MODEL_PROVIDER")
     try:
@@ -94,7 +111,8 @@ def task_model_missing_key_error() -> None:
 
 def task_model_provider_failure_handled() -> None:
     class FailingAdapter:
-        def generate(self, _prompt: str):
+        def generate(self, _prompt: str, messages=None):
+            del messages
             raise ModelAdapterError("synthetic provider failure")
 
     result = run_single_turn("hello from failing provider", model_adapter=FailingAdapter())
@@ -114,6 +132,8 @@ def task_model_real_openai_success_optional() -> None:
     result = run_single_turn("Reply with exactly: READY")
     assert result.model_provider == "openai", result.model_provider
     assert result.used_fallback is False, result.used_fallback
+    assert result.persona_name == "openclaw-learning", result.persona_name
+    assert result.persona_version == "v1", result.persona_version
     assert result.assistant_output.strip(), "empty assistant output"
 
 
@@ -136,6 +156,8 @@ TASKS = [
     ("v0_trim_behavior", task_v0_trim_behavior),
     ("v0_no_memory", task_v0_no_memory),
     ("v0_no_tool_calls", task_v0_no_tool_calls),
+    ("persona_loaded_default", task_persona_loaded_default),
+    ("persona_prompt_builder_structure", task_persona_prompt_builder_structure),
     ("model_stub_default_path", task_model_stub_default_path),
     ("model_missing_key_error", task_model_missing_key_error),
     ("model_provider_failure_handled", task_model_provider_failure_handled),

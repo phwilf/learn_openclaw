@@ -2,9 +2,11 @@
 
 This folder will hold subsystem docs as the project grows.
 
+Current deep dives:
+- `persona.md`
+
 Planned files:
 - `core_loop.md`
-- `persona.md`
 - `memory.md`
 - `tools.md`
 - `policy_gateway.md`

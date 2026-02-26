@@ -39,6 +39,13 @@ Recent commits use short, imperative subjects with optional milestone scope (exa
 - PRs should include: purpose, key changes, test evidence (`python3 scripts/run_golden_tasks.py` output), and docs updates when architecture or safety behavior changes.
 - Link related issues/tasks and include screenshots only if UI artifacts are introduced.
 
+## Documentation Update Check (Required)
+After any meaningful code or architecture change, always evaluate whether documentation updates are needed before finishing work.
+- Update `LESSONS_LEARNED.md` for milestone-level learnings and tradeoffs.
+- Update component deep dives in `docs/` (for example `docs/persona.md`, `docs/tools.md`) when behavior/design guidance changes.
+- Update top-level docs (`README.md`, `LEARNING_SPEC.md`, `THREAT_MODEL.md`, `PUBLISH_CHECKLIST.md`) when setup, scope, risk, or release criteria change.
+- If no doc updates are required, explicitly confirm that decision in the final summary.
+
 ## Security & Configuration Tips
 - Never commit secrets; use `.env` locally and keep `.env.example` as placeholders only.
 - Ensure `gitleaks` is installed before committing.

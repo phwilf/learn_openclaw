@@ -27,7 +27,7 @@ class ModelResult:
 
 
 class ModelAdapter(Protocol):
-    def generate(self, prompt: str) -> ModelResult:
+    def generate(self, prompt: str, messages: list[dict[str, str]] | None = None) -> ModelResult:
         ...
 
 
@@ -54,7 +54,8 @@ class StubModelAdapter:
     def __init__(self, model_name: str = "v0-echo") -> None:
         self.model_name = model_name
 
-    def generate(self, prompt: str) -> ModelResult:
+    def generate(self, prompt: str, messages: list[dict[str, str]] | None = None) -> ModelResult:
+        del messages
         started = perf_counter()
         text = f"v0> {prompt.strip()}"
         latency_ms = int((perf_counter() - started) * 1000)
@@ -68,11 +69,11 @@ class OpenAIModelAdapter:
         self.timeout_seconds = timeout_seconds
         self.base_url = base_url
 
-    def generate(self, prompt: str) -> ModelResult:
+    def generate(self, prompt: str, messages: list[dict[str, str]] | None = None) -> ModelResult:
         started = perf_counter()
         payload = {
             "model": self.model,
-            "messages": [{"role": "user", "content": prompt}],
+            "messages": messages if messages else [{"role": "user", "content": prompt}],
         }
         body = json.dumps(payload).encode("utf-8")
         req = request.Request(

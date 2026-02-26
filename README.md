@@ -35,6 +35,10 @@ PYTHONPATH=src python3 -m local_assistant.core_loop
 MODEL_PROVIDER=openai OPENAI_API_KEY=... PYTHONPATH=src python3 -m local_assistant.core_loop
 ```
 
+## Persona profile
+- Default profile: `src/local_assistant/persona/default.json`
+- Optional override: set `PERSONA_PROFILE_PATH=/absolute/path/to/profile.json`
+
 ## Security checks
 ```bash
 ./install_hooks.sh
