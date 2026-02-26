@@ -83,3 +83,12 @@ Capture short notes at each milestone so learning is shareable.
 - Safety implications: Persona remains communication guidance only; enforcement still belongs in policy/tool layers.
 - What I would do differently next time: Add persona variants and compare them in eval runs before expanding policy/tool features.
 - Deep dive: See `docs/persona.md` for implementation details.
+
+### Milestone: Step 3d - Explicit Capability Shipping Rule
+- Date: 2026-02-26
+- What changed: Promoted `schema + execution path + eval` from an implicit practice to an explicit planning rule.
+- What worked: This clarified that golden tasks are necessary but not always sufficient for every capability.
+- What failed / surprised me: It is easy to treat “eval” as only one script, which can miss contract-level bugs.
+- Key tradeoff: Slightly more process overhead vs. stronger reliability and explainability.
+- Safety implications: Reduces risk of shipping partially defined features with unclear boundaries.
+- What I would do differently next time: Define required eval types per milestone earlier (golden + targeted checks).

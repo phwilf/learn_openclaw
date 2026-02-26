@@ -40,6 +40,7 @@ By the end, I should be able to:
 3. Module boundaries stay strict.
 4. New capability must include an evaluation case.
 5. Prefer simple, explicit mechanisms over hidden magic.
+6. New capability ships only when `schema + execution path + eval` are all present.
 
 ## 5) System Modules (Target Mental Model)
 - `core_loop`: Message handling and orchestration.
@@ -88,6 +89,7 @@ Maintain a `golden_tasks` suite (10-20 tasks) covering:
 - External harness adapter behavior
 
 Rule: no major change ships without re-running the suite and recording results.
+Note: golden tasks are one evaluation type; capability-level checks may also include unit/contract/smoke tests.
 
 ## 9) External Harness Extension Goal (Claude Code/Codex-style)
 Goal: learn to build *on top of* existing harnesses, not only from scratch.
