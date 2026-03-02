@@ -28,6 +28,8 @@ Not intended for multi-tenant production use.
 - Deny-by-default policy gateway for tool calls.
 - Explicit approval requirement for side-effectful actions.
 - Tool allowlist with constrained argument validation.
+- Container boundary for risky tools, with explicit mount allowlist.
+- Read-only filesystem defaults for tool execution unless explicitly required.
 - Structured audit logs for policy decisions and side effects.
 - Separate private runtime state from repo-tracked files.
 - Pre-publish secret scanning and checklist enforcement.

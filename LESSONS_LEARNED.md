@@ -92,3 +92,39 @@ Capture short notes at each milestone so learning is shareable.
 - Key tradeoff: Slightly more process overhead vs. stronger reliability and explainability.
 - Safety implications: Reduces risk of shipping partially defined features with unclear boundaries.
 - What I would do differently next time: Define required eval types per milestone earlier (golden + targeted checks).
+
+### Milestone: Step 3e - Isolation-First Tooling Plan Update
+- Date: 2026-02-26
+- What changed: Added an explicit container-isolation milestone for risky tools, including read-only defaults and mount allowlists.
+- What worked: This made the safety plan more concrete before shell/network tool power expands.
+- What failed / surprised me: It is easy to under-specify isolation details unless they are written as milestone gates.
+- Key tradeoff: More implementation overhead vs. lower risk of filesystem/tool misuse.
+- Safety implications: Improves blast-radius control for side-effectful tool execution.
+- What I would do differently next time: Add isolation-focused eval tasks at the same time as the first risky tool implementation.
+
+### Milestone: Step 4 - Tools + Policy Gateway (Minimal Safe Path)
+- Date: 2026-02-27
+- What changed: Added typed tool contracts/registry, implemented `read_text_file`, and enforced policy-first tool execution with `allow | deny | require_approval`.
+- What worked: A narrow `/tool <name> <json-args>` format kept the execution path explicit and testable.
+- What failed / surprised me: User-facing denial text must stay intentionally generic while logs carry richer policy detail.
+- Key tradeoff: Minimal capability now vs. strict safety boundaries and auditable decisions.
+- Safety implications: Unknown tools are denied by default, side-effectful tools are gated behind `require_approval`, and file reads are repo-scoped.
+- What I would do differently next time: Add interactive approval UX and config-driven policy rules as the next incremental hardening steps.
+
+### Milestone: Step 4 P1 - Interactive Approval Prompt
+- Date: 2026-02-27
+- What changed: Added pending approval state, natural-language approve/deny handling, and auto-cancel on unrelated input.
+- What worked: Human-in-the-loop approval made side-effectful tool execution explicit while preserving policy-first architecture.
+- What failed / surprised me: Approval parsing needs strict boundaries to avoid accidental confirmations.
+- Key tradeoff: Additional interaction step vs. stronger control over side effects.
+- Safety implications: Side-effectful actions now require explicit confirmation before execution and pending actions are canceled on context switch.
+- What I would do differently next time: Add timeout/expiry and request IDs for more robust pending-approval management.
+
+### Milestone: Step 4 P1b - Config-Driven Policy Rules
+- Date: 2026-02-27
+- What changed: Moved policy decisions from hardcoded branches to validated JSON rules with explicit schema.
+- What worked: Behavior stayed stable while policy became auditable and editable without code changes.
+- What failed / surprised me: Hard-fail config loading increases safety but makes malformed config immediately blocking.
+- Key tradeoff: Stricter startup/runtime constraints vs. better policy integrity and traceability.
+- Safety implications: Missing/invalid policy config now fails closed; reason codes are config-driven while user-safe messaging remains controlled in code.
+- What I would do differently next time: Add lightweight tooling to validate policy files before runtime.

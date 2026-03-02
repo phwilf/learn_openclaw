@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "default_action": "deny",
+  "default_reason_code": "not_allowed",
+  "unknown_tool_reason_code": "unknown_tool",
+  "tools": {
+    "read_text_file": {
+      "approval_required": false,
+      "requires_repo_scope": true,
+      "allow": true,
+      "reason_codes": {
+        "allow": "allowed_read_only",
+        "deny_scope": "path_out_of_scope",
+        "deny_default": "not_allowed"
+      }
+    },
+    "write_text_file": {
+      "approval_required": true,
+      "requires_repo_scope": true,
+      "allow": true,
+      "reason_codes": {
+        "require_approval": "side_effectful",
+        "allow": "allowed_with_approval",
+        "deny_scope": "path_out_of_scope",
+        "deny_default": "not_allowed"
+      }
+    }
+  }
+}

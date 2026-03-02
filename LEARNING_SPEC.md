@@ -24,6 +24,7 @@ By the end, I should be able to:
 - Local-first assistant with modular architecture.
 - Plain-text, inspectable state (files/SQLite/config).
 - Explicit policy enforcement before tool execution.
+- Container isolation boundary for higher-risk tools.
 - Memory + compaction + scheduled automation.
 - Basic multi-agent routing.
 - Integration layer for external harnesses (e.g., Claude Code/Codex-like runtime).
@@ -41,6 +42,7 @@ By the end, I should be able to:
 4. New capability must include an evaluation case.
 5. Prefer simple, explicit mechanisms over hidden magic.
 6. New capability ships only when `schema + execution path + eval` are all present.
+7. Risky tool execution must cross an explicit isolation boundary.
 
 ## 5) System Modules (Target Mental Model)
 - `core_loop`: Message handling and orchestration.
@@ -60,10 +62,11 @@ By the end, I should be able to:
 2. Add persistence + replay: inspect token and state growth.
 3. Add persona layer: behavior consistency checks.
 4. Add tools + policy gateway: safe execution path.
-5. Add compaction + memory quality checks.
-6. Add automation scheduler with isolated run context.
-7. Add multi-agent routing and handoff protocol.
-8. Add external harness adapter(s) and verify extension safety.
+5. Add container isolation boundary for risky tools (mount allowlist + read-only defaults).
+6. Add compaction + memory quality checks.
+7. Add automation scheduler with isolated run context.
+8. Add multi-agent routing and handoff protocol.
+9. Add external harness adapter(s) and verify extension safety.
 
 ## 7) Observability Requirements
 At minimum, log:
@@ -112,6 +115,8 @@ Practical checkpoints:
 - Default deny for risky tools.
 - Explicit user approval for side-effectful actions.
 - Sandboxed tool execution where possible.
+- Containerized execution for higher-risk tools where practical.
+- Read-only filesystem defaults with explicit writable mount allowlist.
 - No silent execution of shell/network actions.
 - Audit trail for every side effect.
 
@@ -144,10 +149,11 @@ Release rule:
 Use these review gates:
 1. Architecture gate: modules exist with clear boundaries.
 2. Safety gate: policy gateway blocks unsafe paths by default.
-3. Reliability gate: golden task pass rate does not regress.
-4. Extensibility gate: external adapter works without bypassing controls.
-5. Explainability gate: can narrate one full trace from input to side effect.
-6. Publishability gate: repo passes publish checklist with no secret exposure.
+3. Isolation gate: risky tools run through container boundary with constrained mounts.
+4. Reliability gate: golden task pass rate does not regress.
+5. Extensibility gate: external adapter works without bypassing controls.
+6. Explainability gate: can narrate one full trace from input to side effect.
+7. Publishability gate: repo passes publish checklist with no secret exposure.
 
 ---
 

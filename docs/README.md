@@ -4,6 +4,8 @@ This folder will hold subsystem docs as the project grows.
 
 Current deep dives:
 - `persona.md`
+- `tools.md`
+- `policy_gateway.md`
 
 Evaluation framing:
 - Golden tasks are the baseline regression layer.

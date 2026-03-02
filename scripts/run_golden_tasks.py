@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Minimal golden-task runner for the Step 2 baseline."""
+"""Golden-task runner for baseline + incremental architecture milestones."""
 
 from __future__ import annotations
 
 import subprocess
 import sys
 import os
+import json
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -15,10 +16,18 @@ SRC_PATH = REPO_ROOT / "src"
 if str(SRC_PATH) not in sys.path:
     sys.path.insert(0, str(SRC_PATH))
 
-from local_assistant.core_loop import run_single_turn
+from local_assistant.core_loop import reset_approval_state, run_single_turn
 from local_assistant.core_loop.prompt_builder import build_messages
 from local_assistant.integration_adapters import ModelAdapterError, StubModelAdapter
 from local_assistant.persona import load_persona
+from local_assistant.policy_gateway import (
+    PolicyConfigError,
+    evaluate_tool_intent,
+    load_policy_rules,
+    reset_policy_rules_cache,
+)
+from local_assistant.tools import ToolIntent, build_default_registry
+from local_assistant.tools.read_text_file import get_repo_root
 
 
 @dataclass
@@ -30,6 +39,8 @@ class TaskResult:
 
 def _run_task(name: str, check) -> TaskResult:
     try:
+        reset_approval_state()
+        reset_policy_rules_cache()
         check()
         return TaskResult(name=name, passed=True, detail="ok")
     except Exception as exc:  # noqa: BLE001
@@ -57,6 +68,135 @@ def task_v0_no_tool_calls() -> None:
     prompt = "run a shell command and fetch from the network"
     result = run_single_turn(prompt, model_adapter=StubModelAdapter())
     assert result.assistant_output == f"v0> {prompt}", result.assistant_output
+
+
+def _tool_payload(result) -> dict[str, object]:
+    payload = json.loads(result.assistant_output)
+    assert payload["type"] in {"tool_result", "approval"}, payload
+    return payload
+
+
+def task_tool_allowed_read_only_success() -> None:
+    result = run_single_turn('/tool read_text_file {"path":"README.md"}')
+    payload = _tool_payload(result)
+    assert payload["status"] == "ok", payload
+    assert payload["tool"] == "read_text_file", payload
+    assert "Local Assistant Learning Project" in str(payload.get("content", "")), payload
+
+
+def task_tool_unknown_denied_default() -> None:
+    result = run_single_turn('/tool unknown_tool {"path":"README.md"}')
+    payload = _tool_payload(result)
+    assert payload["status"] == "deny", payload
+    assert payload["reason_code"] == "unknown_tool", payload
+    assert payload["message"] == "Tool request denied.", payload
+
+
+def task_tool_side_effect_requires_approval() -> None:
+    result = run_single_turn('/tool write_text_file {"path":"README.md","content":"hi"}')
+    payload = _tool_payload(result)
+    assert payload["status"] == "require_approval", payload
+    assert payload["reason_code"] == "side_effectful", payload
+    assert "Approval required" in str(payload["message"]), payload
+    assert "content" not in payload, payload
+
+
+def task_tool_scope_boundary_denied() -> None:
+    result = run_single_turn('/tool read_text_file {"path":"../README.md"}')
+    payload = _tool_payload(result)
+    assert payload["status"] == "deny", payload
+    assert payload["reason_code"] == "path_out_of_scope", payload
+    assert payload["message"] == "Tool request denied.", payload
+
+
+def task_policy_user_safe_and_internal_detailed() -> None:
+    registry = build_default_registry()
+    intent = ToolIntent(name="read_text_file", args={"path": "../README.md"})
+    decision = evaluate_tool_intent(intent, registry.get(intent.name), get_repo_root())
+    assert decision.status == "deny", decision
+    assert decision.user_message == "Tool request denied.", decision
+    assert "repository scope" in decision.internal_detail, decision
+
+
+def task_policy_config_load_success() -> None:
+    rules = load_policy_rules()
+    assert rules.version == 1, rules
+    assert rules.default_action == "deny", rules
+    assert "read_text_file" in rules.tools, rules
+
+
+def task_policy_config_invalid_hard_fail() -> None:
+    bad_path = REPO_ROOT / "tmp" / "invalid-policy-rules.json"
+    bad_path.parent.mkdir(parents=True, exist_ok=True)
+    bad_path.write_text("{ bad json", encoding="utf-8")
+    old_value = os.environ.get("POLICY_RULES_PATH")
+    try:
+        os.environ["POLICY_RULES_PATH"] = str(bad_path)
+        reset_policy_rules_cache()
+        try:
+            load_policy_rules()
+        except PolicyConfigError:
+            return
+        raise AssertionError("Expected PolicyConfigError for invalid policy config JSON")
+    finally:
+        if old_value is None:
+            os.environ.pop("POLICY_RULES_PATH", None)
+        else:
+            os.environ["POLICY_RULES_PATH"] = old_value
+        reset_policy_rules_cache()
+        bad_path.unlink(missing_ok=True)
+
+
+def task_approval_nl_approve_executes_tool() -> None:
+    rel_path = "tmp/approval-test.txt"
+    file_path = REPO_ROOT / rel_path
+    file_path.parent.mkdir(parents=True, exist_ok=True)
+    if file_path.exists():
+        file_path.unlink()
+
+    first = run_single_turn(f'/tool write_text_file {{"path":"{rel_path}","content":"approved"}}')
+    first_payload = _tool_payload(first)
+    assert first_payload["status"] == "require_approval", first_payload
+
+    second = run_single_turn("yes, go ahead")
+    second_payload = _tool_payload(second)
+    assert second_payload["status"] == "ok", second_payload
+    assert file_path.read_text(encoding="utf-8") == "approved"
+    file_path.unlink()
+
+
+def task_approval_nl_deny_cancels_tool() -> None:
+    rel_path = "tmp/approval-deny.txt"
+    file_path = REPO_ROOT / rel_path
+    if file_path.exists():
+        file_path.unlink()
+    first = run_single_turn(f'/tool write_text_file {{"path":"{rel_path}","content":"deny-me"}}')
+    first_payload = _tool_payload(first)
+    assert first_payload["status"] == "require_approval", first_payload
+
+    second = run_single_turn("no, cancel that")
+    second_payload = _tool_payload(second)
+    assert second_payload["type"] == "approval", second_payload
+    assert second_payload["status"] == "denied", second_payload
+    assert not file_path.exists()
+
+
+def task_approval_unrelated_input_auto_cancels() -> None:
+    first = run_single_turn('/tool write_text_file {"path":"tmp/approval-cancel.txt","content":"x"}')
+    first_payload = _tool_payload(first)
+    assert first_payload["status"] == "require_approval", first_payload
+
+    second = run_single_turn("hello", model_adapter=StubModelAdapter())
+    assert "Pending approval for write_text_file was canceled due to new input." in second.assistant_output
+    assert second.assistant_output.strip().endswith("v0> hello"), second.assistant_output
+
+
+def task_approval_no_pending_guidance() -> None:
+    result = run_single_turn("approve")
+    payload = _tool_payload(result)
+    assert payload["type"] == "approval", payload
+    assert payload["status"] == "no_pending", payload
+    assert "No pending approval request" in str(payload["message"]), payload
 
 
 def task_persona_loaded_default() -> None:
@@ -156,6 +296,17 @@ TASKS = [
     ("v0_trim_behavior", task_v0_trim_behavior),
     ("v0_no_memory", task_v0_no_memory),
     ("v0_no_tool_calls", task_v0_no_tool_calls),
+    ("tool_allowed_read_only_success", task_tool_allowed_read_only_success),
+    ("tool_unknown_denied_default", task_tool_unknown_denied_default),
+    ("tool_side_effect_requires_approval", task_tool_side_effect_requires_approval),
+    ("tool_scope_boundary_denied", task_tool_scope_boundary_denied),
+    ("policy_user_safe_and_internal_detailed", task_policy_user_safe_and_internal_detailed),
+    ("policy_config_load_success", task_policy_config_load_success),
+    ("policy_config_invalid_hard_fail", task_policy_config_invalid_hard_fail),
+    ("approval_nl_approve_executes_tool", task_approval_nl_approve_executes_tool),
+    ("approval_nl_deny_cancels_tool", task_approval_nl_deny_cancels_tool),
+    ("approval_unrelated_input_auto_cancels", task_approval_unrelated_input_auto_cancels),
+    ("approval_no_pending_guidance", task_approval_no_pending_guidance),
     ("persona_loaded_default", task_persona_loaded_default),
     ("persona_prompt_builder_structure", task_persona_prompt_builder_structure),
     ("model_stub_default_path", task_model_stub_default_path),
